@@ -84,7 +84,8 @@ export const toolDefinitions: FunctionDeclaration[] = [
   },
   {
     name: "bitable_update_record",
-    description: "Cap nhat mot ban ghi da co trong Lark Base (Bitable) theo record_id.",
+    description:
+      "Cap nhat mot ban ghi da co trong Lark Base (Bitable) theo record_id. BAT BUOC 2 buoc: lan goi dau KHONG dat confirmed (hoac confirmed=false) de xem truoc thay doi va hoi nguoi dung xac nhan; CHI duoc dat confirmed=true de thuc su ghi thay doi SAU KHI nguoi dung da tra loi dong y ro rang trong tin nhan tiep theo.",
     parametersJsonSchema: {
       type: "object",
       properties: {
@@ -92,19 +93,28 @@ export const toolDefinitions: FunctionDeclaration[] = [
         table_id: { type: "string" },
         record_id: { type: "string" },
         fields: { type: "object" },
+        confirmed: {
+          type: "boolean",
+          description: "Chi dat true khi nguoi dung DA xac nhan dong y trong tin nhan truoc do. Mac dinh la false/bo qua.",
+        },
       },
       required: ["record_id", "fields"],
     },
   },
   {
     name: "bitable_delete_record",
-    description: "Xoa mot ban ghi trong Lark Base (Bitable) theo record_id.",
+    description:
+      "Xoa mot ban ghi trong Lark Base (Bitable) theo record_id. BAT BUOC 2 buoc: lan goi dau KHONG dat confirmed (hoac confirmed=false) de xem truoc va hoi nguoi dung xac nhan; CHI duoc dat confirmed=true de thuc su xoa SAU KHI nguoi dung da tra loi dong y ro rang trong tin nhan tiep theo. Day la hanh dong KHONG THE HOAN TAC.",
     parametersJsonSchema: {
       type: "object",
       properties: {
         app_token: { type: "string" },
         table_id: { type: "string" },
         record_id: { type: "string" },
+        confirmed: {
+          type: "boolean",
+          description: "Chi dat true khi nguoi dung DA xac nhan dong y trong tin nhan truoc do. Mac dinh la false/bo qua.",
+        },
       },
       required: ["record_id"],
     },
@@ -392,6 +402,17 @@ export async function executeTool(
       }
 
       case "bitable_update_record": {
+        if (input.confirmed !== true) {
+          return JSON.stringify({
+            ok: false,
+            needs_confirmation: true,
+            action: "update",
+            record_id: input.record_id,
+            new_fields: input.fields,
+            message:
+              "Chua thuc hien - day la thao tac sua du lieu da co, can nguoi dung xac nhan dong y truoc. Hay mo ta ro thay doi nay va hoi nguoi dung, chi goi lai voi confirmed=true sau khi ho dong y.",
+          });
+        }
         const appToken = (input.app_token as string) || config.defaults.bitableAppToken;
         const tableId = (input.table_id as string) || config.defaults.bitableTableId;
         if (!appToken || !tableId) throw new Error("Thieu app_token/table_id va khong co gia tri mac dinh nao duoc cau hinh.");
@@ -400,6 +421,16 @@ export async function executeTool(
       }
 
       case "bitable_delete_record": {
+        if (input.confirmed !== true) {
+          return JSON.stringify({
+            ok: false,
+            needs_confirmation: true,
+            action: "delete",
+            record_id: input.record_id,
+            message:
+              "Chua thuc hien - day la thao tac XOA khong the hoan tac, can nguoi dung xac nhan dong y truoc. Hay canh bao ro va hoi nguoi dung, chi goi lai voi confirmed=true sau khi ho dong y.",
+          });
+        }
         const appToken = (input.app_token as string) || config.defaults.bitableAppToken;
         const tableId = (input.table_id as string) || config.defaults.bitableTableId;
         if (!appToken || !tableId) throw new Error("Thieu app_token/table_id va khong co gia tri mac dinh nao duoc cau hinh.");

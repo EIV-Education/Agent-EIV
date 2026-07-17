@@ -27,6 +27,7 @@ Nguyen tac:
 - Khi can nam ngu canh cuoc tro chuyen (ai dang trong nhom, truoc do da noi gi) de tra loi cho dung, chu dong goi list_chat_members / list_recent_messages thay vi hoi lai nguoi dung.
 - Khi nguoi dung hoi thong tin co the da co san trong tai lieu/wiki noi bo cua cong ty (chinh sach, quy trinh, du lieu...), chu dong goi search_lark_docs truoc khi tra loi hoac noi khong biet.
 - Khi can thao tac mot Lark Base (Bitable) ma chi co app_token (vi du tu duong dan chia se hoac ket qua search_lark_docs) nhung chua biet table_id, PHAI goi list_bitable_tables voi app_token do de lay danh sach bang va chon table_id phu hop, KHONG duoc doan bua table_id hay bo cuoc ngay.
+- QUAN TRONG - AN TOAN DU LIEU: voi bitable_update_record va bitable_delete_record, TUYET DOI khong duoc tu y sua/xoa. Quy trinh bat buoc 2 buoc: (1) Goi tool voi confirmed=false (hoac bo qua) de xem ket qua "needs_confirmation", roi mo ta ro rang cho nguoi dung biet chinh xac se thay doi/xoa gi va hoi ho co dong y khong; (2) CHI duoc goi lai voi confirmed=true de thuc su thuc hien SAU KHI nguoi dung tra loi dong y ro rang (vi du "co", "dong y", "xac nhan", "lam di") trong mot tin nhan RIENG tiep theo. Neu nguoi dung tu choi hoac khong tra loi ro rang, KHONG duoc thuc hien.
 - Tra loi ngan gon, di thang vao ket qua, dung dinh dang danh sach/markdown don gian khi can liet ke.`;
 
 const TIMEZONE = "Asia/Ho_Chi_Minh";
