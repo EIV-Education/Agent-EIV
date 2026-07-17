@@ -16,7 +16,16 @@ export interface EmailSearchResult {
   snippet: string;
 }
 
+function assertEmailConfigured(): void {
+  if (!config.email.imapHost || !config.email.user || !config.email.password) {
+    throw new Error(
+      "Chua cau hinh email - can dien EMAIL_IMAP_HOST, EMAIL_USER, EMAIL_PASSWORD trong bien moi truong thi moi tim kiem email duoc."
+    );
+  }
+}
+
 export async function searchEmails(input: EmailSearchInput): Promise<EmailSearchResult[]> {
+  assertEmailConfigured();
   const client = new ImapFlow({
     host: config.email.imapHost,
     port: config.email.imapPort,
