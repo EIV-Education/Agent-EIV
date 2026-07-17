@@ -1,4 +1,5 @@
 import type { FunctionDeclaration } from "@google/genai";
+import util from "node:util";
 import { config } from "../config";
 import { sendText } from "../lark/messaging";
 import { createRecord, updateRecord, deleteRecord, searchRecords, createBase, listTables, SearchCondition, CreateBaseFieldInput } from "../lark/bitable";
@@ -575,7 +576,10 @@ export async function executeTool(
     }
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
-    logger.error(`Tool ${name} failed:`, message);
+    // Full detail (e.g. Lark's field_violations) at depth: null so it isn't
+    // truncated to "[Array]"/"[Object]" in the log - needed to diagnose API
+    // validation errors that don't explain themselves in `message` alone.
+    logger.error(`Tool ${name} failed:`, message, util.inspect(err, { depth: null }));
     return JSON.stringify({ ok: false, error: message });
   }
 }
