@@ -6,6 +6,9 @@ import { createTask } from "../lark/task";
 import { createCalendarEvent } from "../lark/calendar";
 import { createReportDoc } from "../lark/docx";
 import { searchDepartments, listDepartmentMembers } from "../lark/contact";
+import { listChatMembers, listRecentMessages } from "../lark/chat";
+import { searchDocsAndWiki } from "../lark/docSearch";
+import { submitApproval, getApprovalInstance } from "../lark/approval";
 import { sendEmail } from "../email/mailer";
 import { searchEmails } from "../email/searcher";
 import { callInternalApi } from "../internal/webhookCall";
@@ -163,6 +166,68 @@ export const toolDefinitions: FunctionDeclaration[] = [
     },
   },
   {
+    name: "list_chat_members",
+    description: "Lay danh sach thanh vien (open_id, ten) cua mot nhom chat Lark, de biet ai dang o trong nhom.",
+    parametersJsonSchema: {
+      type: "object",
+      properties: {
+        chat_id: { type: "string", description: "Bo qua de dung nhom chat hien tai" },
+      },
+      required: [],
+    },
+  },
+  {
+    name: "list_recent_messages",
+    description: "Doc lai cac tin nhan gan day trong mot nhom chat de nam ngu canh cuoc tro chuyen (vi du de tom tat, tra loi dua tren nhung gi da trao doi).",
+    parametersJsonSchema: {
+      type: "object",
+      properties: {
+        chat_id: { type: "string", description: "Bo qua de dung nhom chat hien tai" },
+        limit: { type: "number", description: "So tin nhan toi da, mac dinh 20" },
+      },
+      required: [],
+    },
+  },
+  {
+    name: "search_lark_docs",
+    description: "Tim kiem noi dung trong Lark Docs/Wiki/Sheet/Base cua cong ty theo tu khoa, tra ve tieu de, tom tat va duong dan - dung khi nguoi dung hoi thong tin co the co san trong tai lieu noi bo.",
+    parametersJsonSchema: {
+      type: "object",
+      properties: {
+        query: { type: "string" },
+        limit: { type: "number", description: "Mac dinh 10" },
+      },
+      required: ["query"],
+    },
+  },
+  {
+    name: "submit_lark_approval",
+    description:
+      "Gui mot yeu cau phe duyet (Lark Approval), vi du don xin nghi phep, de xuat chi phi. Can biet truoc approval_code (ma quy trinh duyet) va cau truc form du lieu tuong ung - neu nguoi dung khong cung cap, hoi ho lay tu quan tri Lark Approval cua cong ty.",
+    parametersJsonSchema: {
+      type: "object",
+      properties: {
+        approval_code: { type: "string", description: "Ma dinh nghia quy trinh duyet trong Lark Approval" },
+        form: {
+          type: "string",
+          description: "Chuoi JSON dang mang [{\"id\":\"widget_id\",\"type\":\"...\",\"value\":...}] khop voi form cua quy trinh duyet do",
+        },
+      },
+      required: ["approval_code", "form"],
+    },
+  },
+  {
+    name: "get_approval_status",
+    description: "Tra cuu trang thai mot yeu cau phe duyet da gui (PENDING/APPROVED/REJECTED/CANCELED).",
+    parametersJsonSchema: {
+      type: "object",
+      properties: {
+        instance_id: { type: "string", description: "instance_code tra ve khi submit_lark_approval" },
+      },
+      required: ["instance_id"],
+    },
+  },
+  {
     name: "create_report_doc",
     description:
       "Tao mot bao cao dang tai lieu Lark Docs (docx) tu tieu de va danh sach cac dong noi dung, tra ve duong dan de nguoi dung mo xem.",
@@ -225,6 +290,7 @@ export const toolDefinitions: FunctionDeclaration[] = [
 
 export interface ToolContext {
   senderOpenId?: string;
+  chatId?: string;
 }
 
 export async function executeTool(
@@ -316,6 +382,40 @@ export async function executeTool(
       case "list_department_members": {
         const members = await listDepartmentMembers(input.open_department_id as string);
         return JSON.stringify({ ok: true, members });
+      }
+
+      case "list_chat_members": {
+        const chatId = (input.chat_id as string) || context.chatId;
+        if (!chatId) throw new Error("Khong xac dinh duoc chat_id.");
+        const members = await listChatMembers(chatId);
+        return JSON.stringify({ ok: true, members });
+      }
+
+      case "list_recent_messages": {
+        const chatId = (input.chat_id as string) || context.chatId;
+        if (!chatId) throw new Error("Khong xac dinh duoc chat_id.");
+        const messages = await listRecentMessages(chatId, (input.limit as number) ?? 20);
+        return JSON.stringify({ ok: true, messages });
+      }
+
+      case "search_lark_docs": {
+        const results = await searchDocsAndWiki(input.query as string, (input.limit as number) ?? 10);
+        return JSON.stringify({ ok: true, results });
+      }
+
+      case "submit_lark_approval": {
+        if (!context.senderOpenId) throw new Error("Khong xac dinh duoc nguoi gui de nop don duyet.");
+        const result = await submitApproval({
+          approvalCode: input.approval_code as string,
+          openId: context.senderOpenId,
+          form: input.form as string,
+        });
+        return JSON.stringify({ ok: true, ...result });
+      }
+
+      case "get_approval_status": {
+        const instance = await getApprovalInstance(input.instance_id as string);
+        return JSON.stringify({ ok: true, instance });
       }
 
       case "create_report_doc": {

@@ -24,6 +24,9 @@ Cac tool hien co (`src/agent/tools.ts`):
 | `create_lark_calendar_event` | Tao su kien Lark Calendar |
 | `create_report_doc` | Tao bao cao dang tai lieu Lark Docs |
 | `search_lark_department` / `list_department_members` | Tim phong ban theo ten va lay danh sach thanh vien (open_id that) - dung de moi ca mot team vao lich/tin nhan |
+| `list_chat_members` / `list_recent_messages` | Doc danh sach thanh vien va tin nhan gan day cua mot nhom chat de nam ngu canh |
+| `search_lark_docs` | Tim kiem noi dung trong Lark Docs/Wiki/Sheet/Base cua cong ty theo tu khoa |
+| `submit_lark_approval` / `get_approval_status` | Gui yeu cau phe duyet (Lark Approval) va tra cuu trang thai |
 | `send_email` / `search_email` | Gui / tim kiem email that (SMTP/IMAP) |
 | `call_internal_api` | Goi API noi bo cua EIV (theo allowlist domain) |
 
@@ -37,7 +40,11 @@ Cac tool hien co (`src/agent/tools.ts`):
    - `task:task:write` (tao Task)
    - `calendar:calendar` (tao su kien)
    - `docx:document` (tao tai lieu bao cao)
-   - `contact:department.base:readonly` va `contact:user.base:readonly` (tim phong ban/thanh vien de tu dong moi vao lich/tin nhan) - tim trong muc "Contact"/"Danh ba". Mot so workspace can **quan tri vien Lark duyet** quyen nay truoc khi dung duoc, hay bao truoc voi IT/admin cua EIV.
+   - `contact:department.base:readonly` va `contact:user.base:readonly` (tim phong ban/thanh vien de tu dong moi vao lich/tin nhan) - tim trong muc "Contact"/"Danh ba".
+   - `im:message:readonly` va `im:chat:readonly` (doc lai tin nhan/thanh vien nhom de nam ngu canh cuoc tro chuyen).
+   - `search:docs.wiki:readonly` (hoac ten tuong duong trong muc "Search"/"Docs") de tim kiem noi dung Docs/Wiki/Sheet/Base cua cong ty.
+   - `approval:approval` (gui/tra cuu yeu cau phe duyet Lark Approval) - can biet truoc `approval_code` cua tung quy trinh duyet (lay trong Lark Approval Admin) thi bot moi gui duoc, bot khong tu tao quy trinh moi.
+   - Mot so quyen o tren can **quan tri vien Lark duyet** truoc khi dung duoc (thuong hien banner "Cho phe duyet" trong Console) - hay bao truoc voi IT/admin cua EIV.
 4. Vao **Events & Callbacks -> Event Configuration**:
    - Bam icon but chi canh **Subscription mode** -> chon **"Receive events/callbacks through persistent connection"** (khuyen nghi, khong can domain public).
    - Vao **Events**, subscribe (them) event `im.message.receive_v1`.
