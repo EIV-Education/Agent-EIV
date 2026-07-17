@@ -21,6 +21,11 @@ export async function createCalendarEvent(input: CreateEventInput) {
       description: input.description,
       start_time: { timestamp: input.startTimestamp, timezone: input.timezone ?? "Asia/Ho_Chi_Minh" },
       end_time: { timestamp: input.endTimestamp, timezone: input.timezone ?? "Asia/Ho_Chi_Minh" },
+      // The bot/app is always the organizer (it authenticates with the
+      // app's own tenant token), so without this, attendees - including
+      // the person who asked the bot to create the event - get read-only
+      // access and can't edit it themselves.
+      attendee_ability: "can_modify_event",
     },
   });
   const event = res.data?.event;
