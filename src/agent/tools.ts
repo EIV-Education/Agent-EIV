@@ -5,7 +5,7 @@ import { createRecord, updateRecord, deleteRecord, searchRecords, SearchConditio
 import { createTask } from "../lark/task";
 import { createCalendarEvent } from "../lark/calendar";
 import { createReportDoc } from "../lark/docx";
-import { searchDepartments, listDepartmentMembers } from "../lark/contact";
+import { searchDepartments, listDepartmentMembers, searchUsersByName } from "../lark/contact";
 import { listChatMembers, listRecentMessages } from "../lark/chat";
 import { searchDocsAndWiki } from "../lark/docSearch";
 import { submitApproval, getApprovalInstance } from "../lark/approval";
@@ -163,6 +163,18 @@ export const toolDefinitions: FunctionDeclaration[] = [
         open_department_id: { type: "string" },
       },
       required: ["open_department_id"],
+    },
+  },
+  {
+    name: "search_lark_user",
+    description:
+      "Tim mot nguoi cu the trong to chuc theo TEN (vi du 'Vo Thi Thuy', 'Chau Anh') de lay open_id, dung khi can moi dich danh mot ca nhan vao lich/tin nhan (khong phai ca mot phong ban). Lark khong co API tim theo ten truc tiep nen tool nay quet qua cac phong ban - co the mat vai giay va co the khong tim thay neu to chuc rat lon, luc do hay hoi nguoi dung phong ban cua nguoi can tim de dung search_lark_department truoc.",
+    parametersJsonSchema: {
+      type: "object",
+      properties: {
+        name: { type: "string", description: "Ten (hoac mot phan ten) can tim" },
+      },
+      required: ["name"],
     },
   },
   {
@@ -382,6 +394,11 @@ export async function executeTool(
       case "list_department_members": {
         const members = await listDepartmentMembers(input.open_department_id as string);
         return JSON.stringify({ ok: true, members });
+      }
+
+      case "search_lark_user": {
+        const users = await searchUsersByName(input.name as string);
+        return JSON.stringify({ ok: true, users });
       }
 
       case "list_chat_members": {
