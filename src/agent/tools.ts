@@ -366,6 +366,7 @@ export async function executeTool(
           name: input.name as string,
           tableName: input.table_name as string | undefined,
           fields: fields.length > 0 ? fields : undefined,
+          ownerOpenId: context.senderOpenId,
         });
         return JSON.stringify({ ok: true, ...base });
       }
@@ -484,7 +485,11 @@ export async function executeTool(
       }
 
       case "create_report_doc": {
-        const doc = await createReportDoc(input.title as string, (input.body_lines as string[]) ?? []);
+        const doc = await createReportDoc(
+          input.title as string,
+          (input.body_lines as string[]) ?? [],
+          context.senderOpenId
+        );
         return JSON.stringify({ ok: true, ...doc });
       }
 

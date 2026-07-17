@@ -45,6 +45,7 @@ Cac tool hien co (`src/agent/tools.ts`):
    - `im:message:readonly` va `im:chat:readonly` (doc lai tin nhan/thanh vien nhom de nam ngu canh cuoc tro chuyen).
    - `search:docs.wiki:readonly` (hoac ten tuong duong trong muc "Search"/"Docs") de tim kiem noi dung Docs/Wiki/Sheet/Base cua cong ty.
    - `approval:approval` (gui/tra cuu yeu cau phe duyet Lark Approval) - can biet truoc `approval_code` cua tung quy trinh duyet (lay trong Lark Approval Admin) thi bot moi gui duoc, bot khong tu tao quy trinh moi.
+   - Quyen quan ly collaborator/permission cua Drive (tim trong muc "Docs"/"Drive Permission", ten thuong la `drive:drive` hoac tuong tu) - **BAT BUOC** de bot tu cap quyen chinh sua cho nguoi yeu cau ngay sau khi tao Base/Docs moi, neu khong nguoi do se chi xem duoc, khong sua duoc (vi bot/app la nguoi so huu tai nguyen vua tao).
    - Mot so quyen o tren can **quan tri vien Lark duyet** truoc khi dung duoc (thuong hien banner "Cho phe duyet" trong Console) - hay bao truoc voi IT/admin cua EIV.
 4. Vao **Events & Callbacks -> Event Configuration**:
    - Bam icon but chi canh **Subscription mode** -> chon **"Receive events/callbacks through persistent connection"** (khuyen nghi, khong can domain public).

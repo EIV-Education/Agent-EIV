@@ -1,7 +1,12 @@
 import { larkClient } from "./client";
 import { config } from "../config";
+import { grantFullAccess } from "./permissions";
 
-export async function createReportDoc(title: string, bodyLines: string[]): Promise<{ documentId: string; url?: string }> {
+export async function createReportDoc(
+  title: string,
+  bodyLines: string[],
+  ownerOpenId?: string
+): Promise<{ documentId: string; url?: string }> {
   const created = await larkClient.docx.document.create({ data: { title } });
   const documentId = created.data?.document?.document_id;
   if (!documentId) {
@@ -20,6 +25,12 @@ export async function createReportDoc(title: string, bodyLines: string[]): Promi
       path: { document_id: documentId, block_id: documentId },
       data: { children, index: 0 } as never,
     });
+  }
+
+  // The app owns the doc it just created via API - grant the requester
+  // full_access so they can actually edit it, not just view.
+  if (ownerOpenId) {
+    await grantFullAccess(documentId, "docx", ownerOpenId);
   }
 
   const url = config.lark.workspaceDomain

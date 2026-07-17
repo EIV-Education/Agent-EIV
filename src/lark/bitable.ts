@@ -1,4 +1,5 @@
 import { larkClient } from "./client";
+import { grantFullAccess } from "./permissions";
 
 type FieldValue = string | number | boolean | Record<string, unknown> | unknown[];
 export type BitableFields = Record<string, FieldValue>;
@@ -99,6 +100,10 @@ export interface CreateBaseInput {
   tableName?: string;
   fields?: CreateBaseFieldInput[];
   folderToken?: string;
+  // Given full_access right after creation - otherwise the app (which
+  // authenticated the create call) is the sole owner and the person who
+  // asked for the Base can only view it, not edit.
+  ownerOpenId?: string;
 }
 
 export interface CreateBaseResult {
@@ -134,6 +139,10 @@ export async function createBase(input: CreateBaseInput): Promise<CreateBaseResu
       },
     });
     tableId = tableRes.data?.table_id ?? tableId;
+  }
+
+  if (input.ownerOpenId) {
+    await grantFullAccess(appToken, "bitable", input.ownerOpenId);
   }
 
   return { appToken, url: appRes.data?.app?.url, tableId };
