@@ -64,3 +64,77 @@ export async function searchRecords(
   });
   return res.data?.items ?? [];
 }
+
+export type BitableFieldType =
+  | "text"
+  | "number"
+  | "single_select"
+  | "multi_select"
+  | "date"
+  | "checkbox"
+  | "person"
+  | "phone"
+  | "url";
+
+const FIELD_TYPE_MAP: Record<BitableFieldType, { type: number; uiType: string }> = {
+  text: { type: 1, uiType: "Text" },
+  number: { type: 2, uiType: "Number" },
+  single_select: { type: 3, uiType: "SingleSelect" },
+  multi_select: { type: 4, uiType: "MultiSelect" },
+  date: { type: 5, uiType: "DateTime" },
+  checkbox: { type: 7, uiType: "Checkbox" },
+  person: { type: 11, uiType: "User" },
+  phone: { type: 13, uiType: "Phone" },
+  url: { type: 15, uiType: "Url" },
+};
+
+export interface CreateBaseFieldInput {
+  fieldName: string;
+  fieldType: BitableFieldType;
+  options?: string[]; // choice labels, for single_select / multi_select
+}
+
+export interface CreateBaseInput {
+  name: string;
+  tableName?: string;
+  fields?: CreateBaseFieldInput[];
+  folderToken?: string;
+}
+
+export interface CreateBaseResult {
+  appToken: string;
+  url?: string;
+  tableId?: string;
+}
+
+export async function createBase(input: CreateBaseInput): Promise<CreateBaseResult> {
+  const appRes = await larkClient.bitable.app.create({
+    data: { name: input.name, folder_token: input.folderToken },
+  });
+  const appToken = appRes.data?.app?.app_token;
+  if (!appToken) {
+    throw new Error("Lark khong tra ve app_token khi tao Base moi.");
+  }
+
+  let tableId = appRes.data?.app?.default_table_id;
+
+  if (input.tableName || (input.fields && input.fields.length > 0)) {
+    const tableRes = await larkClient.bitable.appTable.create({
+      path: { app_token: appToken },
+      data: {
+        table: {
+          name: input.tableName ?? "Table1",
+          fields: input.fields?.map((f) => ({
+            field_name: f.fieldName,
+            type: FIELD_TYPE_MAP[f.fieldType].type,
+            ui_type: FIELD_TYPE_MAP[f.fieldType].uiType as never,
+            property: f.options ? { options: f.options.map((name) => ({ name })) } : undefined,
+          })),
+        },
+      },
+    });
+    tableId = tableRes.data?.table_id ?? tableId;
+  }
+
+  return { appToken, url: appRes.data?.app?.url, tableId };
+}

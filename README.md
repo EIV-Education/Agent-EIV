@@ -19,7 +19,8 @@ Cac tool hien co (`src/agent/tools.ts`):
 | Tool | Chuc nang |
 |---|---|
 | `send_lark_message` | Gui tin nhan chu dong toi nguoi/nhom khac |
-| `bitable_create_record` / `update` / `delete` / `search` | Thao tac Lark Base |
+| `create_lark_base` | Tao moi hoan toan mot Lark Base, co the kem san bang va cac cot du lieu |
+| `bitable_create_record` / `update` / `delete` / `search` | Thao tac Lark Base da co san |
 | `create_lark_task` | Tao cong viec trong Lark Task |
 | `create_lark_calendar_event` | Tao su kien Lark Calendar |
 | `create_report_doc` | Tao bao cao dang tai lieu Lark Docs |

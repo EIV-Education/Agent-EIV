@@ -1,7 +1,7 @@
 import type { FunctionDeclaration } from "@google/genai";
 import { config } from "../config";
 import { sendText } from "../lark/messaging";
-import { createRecord, updateRecord, deleteRecord, searchRecords, SearchCondition } from "../lark/bitable";
+import { createRecord, updateRecord, deleteRecord, searchRecords, createBase, SearchCondition, CreateBaseFieldInput } from "../lark/bitable";
 import { createTask } from "../lark/task";
 import { createCalendarEvent } from "../lark/calendar";
 import { createReportDoc } from "../lark/docx";
@@ -33,9 +33,42 @@ export const toolDefinitions: FunctionDeclaration[] = [
     },
   },
   {
+    name: "create_lark_base",
+    description:
+      "Tao moi hoan toan mot Lark Base (Bitable) trong voi ten va (tuy chon) mot bang du lieu co san cot ngay tu dau. Tra ve app_token/table_id de dung ngay cho cac tool bitable_* khac.",
+    parametersJsonSchema: {
+      type: "object",
+      properties: {
+        name: { type: "string", description: "Ten cua Base moi" },
+        table_name: { type: "string", description: "Ten bang du lieu (bo qua se dung ten mac dinh)" },
+        fields: {
+          type: "array",
+          description: "Danh sach cot can tao san trong bang, bo qua neu chi can Base trong",
+          items: {
+            type: "object",
+            properties: {
+              field_name: { type: "string" },
+              field_type: {
+                type: "string",
+                enum: ["text", "number", "single_select", "multi_select", "date", "checkbox", "person", "phone", "url"],
+              },
+              options: {
+                type: "array",
+                items: { type: "string" },
+                description: "Danh sach lua chon, chi dung cho single_select/multi_select",
+              },
+            },
+            required: ["field_name", "field_type"],
+          },
+        },
+      },
+      required: ["name"],
+    },
+  },
+  {
     name: "bitable_create_record",
     description:
-      "Tao mot ban ghi (record) moi trong bang du lieu Lark Base (Bitable). Neu nguoi dung khong noi ro app_token/table_id, dung bang mac dinh da cau hinh.",
+      "Tao mot ban ghi (record) moi trong bang du lieu Lark Base (Bitable) DA CO SAN. Neu nguoi dung khong noi ro app_token/table_id va khong co bang mac dinh, hay dung create_lark_base de tao Base moi truoc.",
     parametersJsonSchema: {
       type: "object",
       properties: {
@@ -320,6 +353,21 @@ export async function executeTool(
           input.text as string
         );
         return JSON.stringify({ ok: true, message_id: res.messageId });
+      }
+
+      case "create_lark_base": {
+        const rawFields = (input.fields as Array<Record<string, unknown>>) ?? [];
+        const fields: CreateBaseFieldInput[] = rawFields.map((f) => ({
+          fieldName: f.field_name as string,
+          fieldType: f.field_type as CreateBaseFieldInput["fieldType"],
+          options: f.options as string[] | undefined,
+        }));
+        const base = await createBase({
+          name: input.name as string,
+          tableName: input.table_name as string | undefined,
+          fields: fields.length > 0 ? fields : undefined,
+        });
+        return JSON.stringify({ ok: true, ...base });
       }
 
       case "bitable_create_record": {
