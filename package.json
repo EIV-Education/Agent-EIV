@@ -1,6 +1,6 @@
 {
   "name": "lark-ai-agent",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "AI Agent tren Lark co kha nang hanh dong that su (Bitable, Task, Calendar, Message, Email, Docs, Webhook noi bo) thay vi chi tra loi chat, duoc dieu khien boi Gemini function calling.",
   "main": "dist/index.js",
   "scripts": {
