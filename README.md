@@ -23,6 +23,7 @@ Cac tool hien co (`src/agent/tools.ts`):
 | `create_lark_task` | Tao cong viec trong Lark Task |
 | `create_lark_calendar_event` | Tao su kien Lark Calendar |
 | `create_report_doc` | Tao bao cao dang tai lieu Lark Docs |
+| `search_lark_department` / `list_department_members` | Tim phong ban theo ten va lay danh sach thanh vien (open_id that) - dung de moi ca mot team vao lich/tin nhan |
 | `send_email` / `search_email` | Gui / tim kiem email that (SMTP/IMAP) |
 | `call_internal_api` | Goi API noi bo cua EIV (theo allowlist domain) |
 
@@ -36,6 +37,7 @@ Cac tool hien co (`src/agent/tools.ts`):
    - `task:task:write` (tao Task)
    - `calendar:calendar` (tao su kien)
    - `docx:document` (tao tai lieu bao cao)
+   - `contact:department.base:readonly` va `contact:user.base:readonly` (tim phong ban/thanh vien de tu dong moi vao lich/tin nhan) - tim trong muc "Contact"/"Danh ba". Mot so workspace can **quan tri vien Lark duyet** quyen nay truoc khi dung duoc, hay bao truoc voi IT/admin cua EIV.
 4. Vao **Events & Callbacks -> Event Configuration**:
    - Bam icon but chi canh **Subscription mode** -> chon **"Receive events/callbacks through persistent connection"** (khuyen nghi, khong can domain public).
    - Vao **Events**, subscribe (them) event `im.message.receive_v1`.

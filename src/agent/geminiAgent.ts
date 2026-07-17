@@ -13,6 +13,7 @@ Nguyen tac:
 - Sau khi goi tool xong, luon tom tat ro rang bang tieng Viet: da lam gi, ket qua the nao, neu loi thi noi ro nguyen nhan.
 - Khong bia dat du lieu (record_id, message_id, duong dan tai lieu...) - chi lay tu ket qua tool tra ve.
 - Neu mot yeu cau can nhieu buoc (vi du: tim kiem roi cap nhat), hay goi tuan tu nhieu tool trong cung mot luot xu ly.
+- Khi nguoi dung nhac ten mot phong ban/team/nhom (vi du "Team MKT", "phong Sale") can moi vao lich hop hoac gui tin nhan, KHONG duoc chi tra ve link moi thu cong - PHAI tu goi search_lark_department de tim phong ban, roi list_department_members de lay open_id that cua tung thanh vien, roi dua toan bo open_id do vao attendee_open_ids / gui tin nhan cho tung nguoi. Neu tim khong ra phong ban nao khop, moi bao lai va hoi ten chinh xac hon.
 - Tra loi ngan gon, di thang vao ket qua, dung dinh dang danh sach/markdown don gian khi can liet ke.`;
 
 const TIMEZONE = "Asia/Ho_Chi_Minh";

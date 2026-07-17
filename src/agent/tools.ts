@@ -5,6 +5,7 @@ import { createRecord, updateRecord, deleteRecord, searchRecords, SearchConditio
 import { createTask } from "../lark/task";
 import { createCalendarEvent } from "../lark/calendar";
 import { createReportDoc } from "../lark/docx";
+import { searchDepartments, listDepartmentMembers } from "../lark/contact";
 import { sendEmail } from "../email/mailer";
 import { searchEmails } from "../email/searcher";
 import { callInternalApi } from "../internal/webhookCall";
@@ -131,10 +132,34 @@ export const toolDefinitions: FunctionDeclaration[] = [
         attendee_open_ids: {
           type: "array",
           items: { type: "string" },
-          description: "open_id cua nhung nguoi KHAC (ngoai nguoi gui tin nhan) can moi tham gia, neu co",
+          description:
+            "open_id cua nhung nguoi KHAC (ngoai nguoi gui tin nhan) can moi tham gia. Neu nguoi dung nhac ten mot phong ban/team (vi du 'Team MKT'), PHAI goi search_lark_department roi list_department_members truoc de lay open_id that cua tung thanh vien, KHONG duoc bo qua buoc nay hay chi tra ve link moi thu cong.",
         },
       },
       required: ["summary", "start_timestamp", "end_timestamp"],
+    },
+  },
+  {
+    name: "search_lark_department",
+    description:
+      "Tim phong ban/team trong to chuc theo ten (vi du 'MKT', 'Marketing', 'Sale'...). Dung truoc khi can moi ca mot phong ban vao lich/tin nhan.",
+    parametersJsonSchema: {
+      type: "object",
+      properties: {
+        query: { type: "string", description: "Tu khoa ten phong ban can tim" },
+      },
+      required: ["query"],
+    },
+  },
+  {
+    name: "list_department_members",
+    description: "Lay danh sach thanh vien (kem open_id) cua mot phong ban, dung open_department_id tra ve tu search_lark_department.",
+    parametersJsonSchema: {
+      type: "object",
+      properties: {
+        open_department_id: { type: "string" },
+      },
+      required: ["open_department_id"],
     },
   },
   {
@@ -281,6 +306,16 @@ export async function executeTool(
           attendeeOpenIds,
         });
         return JSON.stringify({ ok: true, event, attendees_added: attendeeOpenIds });
+      }
+
+      case "search_lark_department": {
+        const departments = await searchDepartments(input.query as string);
+        return JSON.stringify({ ok: true, departments });
+      }
+
+      case "list_department_members": {
+        const members = await listDepartmentMembers(input.open_department_id as string);
+        return JSON.stringify({ ok: true, members });
       }
 
       case "create_report_doc": {
