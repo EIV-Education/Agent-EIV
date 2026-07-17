@@ -26,7 +26,7 @@ export const config = {
 
   gemini: {
     apiKey: optional("GEMINI_API_KEY"),
-    model: optional("GEMINI_MODEL", "gemini-2.5-flash"),
+    model: optional("GEMINI_MODEL", "gemini-flash-latest"),
   },
 
   email: {
