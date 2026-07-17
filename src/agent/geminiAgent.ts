@@ -45,15 +45,22 @@ function buildSystemPrompt(senderOpenId?: string): string {
   return `${BASE_SYSTEM_PROMPT}\n\n${context}`;
 }
 
-const conversationMemory = new Map<string, Content[]>();
-const MAX_TURNS = 12;
+// History is stored as a list of whole turns (each turn = every Content
+// entry generated while answering one user message, including internal
+// function-call/function-response pairs). Trimming only ever drops whole
+// turns from the front - never slices inside one - because Gemini rejects
+// a functionResponse turn that isn't immediately preceded by its matching
+// functionCall turn (error: "function response turn comes immediately
+// after a function call turn").
+const conversationMemory = new Map<string, Content[][]>();
+const MAX_HISTORY_TURNS = 6;
 
-function getHistory(chatId: string): Content[] {
+function getHistory(chatId: string): Content[][] {
   return conversationMemory.get(chatId) ?? [];
 }
 
-function saveHistory(chatId: string, contents: Content[]): void {
-  conversationMemory.set(chatId, contents.slice(-MAX_TURNS));
+function saveHistory(chatId: string, turns: Content[][]): void {
+  conversationMemory.set(chatId, turns.slice(-MAX_HISTORY_TURNS));
 }
 
 export interface RunAgentInput {
@@ -63,10 +70,9 @@ export interface RunAgentInput {
 }
 
 export async function runAgent(input: RunAgentInput): Promise<string> {
-  const contents: Content[] = [
-    ...getHistory(input.chatId),
-    { role: "user", parts: [{ text: input.text }] },
-  ];
+  const history = getHistory(input.chatId);
+  const turnContents: Content[] = [{ role: "user", parts: [{ text: input.text }] }];
+  const contents: Content[] = [...history.flat(), ...turnContents];
 
   let finalText = "";
   const MAX_ITERATIONS = 8;
@@ -85,7 +91,9 @@ export async function runAgent(input: RunAgentInput): Promise<string> {
 
     const modelContent = response.candidates?.[0]?.content;
     if (modelContent) {
-      contents.push({ role: "model", parts: modelContent.parts ?? [] });
+      const modelEntry: Content = { role: "model", parts: modelContent.parts ?? [] };
+      contents.push(modelEntry);
+      turnContents.push(modelEntry);
     }
 
     const functionCalls = response.functionCalls;
@@ -108,14 +116,16 @@ export async function runAgent(input: RunAgentInput): Promise<string> {
       });
     }
 
-    contents.push({ role: "user", parts: responseParts });
+    const responseEntry: Content = { role: "user", parts: responseParts };
+    contents.push(responseEntry);
+    turnContents.push(responseEntry);
   }
 
   if (!finalText) {
     finalText = "Xin loi, minh chua the hoan tat yeu cau nay trong so buoc cho phep. Ban co the thu chia nho yeu cau khong?";
   }
 
-  saveHistory(input.chatId, contents);
+  saveHistory(input.chatId, [...history, turnContents]);
 
   return finalText;
 }
