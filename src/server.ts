@@ -2,7 +2,7 @@ import express from "express";
 import { Lark, larkEventDispatcher } from "./lark/client";
 import { registerMessageHandler } from "./lark/events";
 import { replyText } from "./lark/messaging";
-import { runAgent } from "./agent/claudeAgent";
+import { runAgent } from "./agent/geminiAgent";
 import { logger } from "./logger";
 
 export function createServer() {

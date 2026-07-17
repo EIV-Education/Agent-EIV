@@ -1,4 +1,4 @@
-import type Anthropic from "@anthropic-ai/sdk";
+import type { FunctionDeclaration } from "@google/genai";
 import { config } from "../config";
 import { sendText } from "../lark/messaging";
 import { createRecord, updateRecord, deleteRecord, searchRecords, SearchCondition } from "../lark/bitable";
@@ -10,12 +10,12 @@ import { searchEmails } from "../email/searcher";
 import { callInternalApi } from "../internal/webhookCall";
 import { logger } from "../logger";
 
-export const toolDefinitions: Anthropic.Tool[] = [
+export const toolDefinitions: FunctionDeclaration[] = [
   {
     name: "send_lark_message",
     description:
       "Gui mot tin nhan van ban chu dong toi mot nguoi dung hoac mot nhom chat khac tren Lark (khong phai cuoc hoi thoai hien tai). Dung khi nguoi dung yeu cau bao cho ai do, thong bao cho mot nhom, hoac chuyen tiep thong tin.",
-    input_schema: {
+    parametersJsonSchema: {
       type: "object",
       properties: {
         receive_id: { type: "string", description: "open_id, user_id, union_id, email, hoac chat_id cua nguoi/nhom nhan" },
@@ -32,7 +32,7 @@ export const toolDefinitions: Anthropic.Tool[] = [
     name: "bitable_create_record",
     description:
       "Tao mot ban ghi (record) moi trong bang du lieu Lark Base (Bitable). Neu nguoi dung khong noi ro app_token/table_id, dung bang mac dinh da cau hinh.",
-    input_schema: {
+    parametersJsonSchema: {
       type: "object",
       properties: {
         app_token: { type: "string", description: "Bo qua neu dung bang Bitable mac dinh" },
@@ -48,7 +48,7 @@ export const toolDefinitions: Anthropic.Tool[] = [
   {
     name: "bitable_update_record",
     description: "Cap nhat mot ban ghi da co trong Lark Base (Bitable) theo record_id.",
-    input_schema: {
+    parametersJsonSchema: {
       type: "object",
       properties: {
         app_token: { type: "string" },
@@ -62,7 +62,7 @@ export const toolDefinitions: Anthropic.Tool[] = [
   {
     name: "bitable_delete_record",
     description: "Xoa mot ban ghi trong Lark Base (Bitable) theo record_id.",
-    input_schema: {
+    parametersJsonSchema: {
       type: "object",
       properties: {
         app_token: { type: "string" },
@@ -75,7 +75,7 @@ export const toolDefinitions: Anthropic.Tool[] = [
   {
     name: "bitable_search_records",
     description: "Tim kiem cac ban ghi trong Lark Base (Bitable) theo dieu kien loc.",
-    input_schema: {
+    parametersJsonSchema: {
       type: "object",
       properties: {
         app_token: { type: "string" },
@@ -104,7 +104,7 @@ export const toolDefinitions: Anthropic.Tool[] = [
   {
     name: "create_lark_task",
     description: "Tao mot cong viec (task) moi trong Lark Task cho ban than bot hoac de nguoi dung theo doi.",
-    input_schema: {
+    parametersJsonSchema: {
       type: "object",
       properties: {
         summary: { type: "string" },
@@ -118,7 +118,7 @@ export const toolDefinitions: Anthropic.Tool[] = [
   {
     name: "create_lark_calendar_event",
     description: "Tao mot su kien / lich hop moi trong Lark Calendar.",
-    input_schema: {
+    parametersJsonSchema: {
       type: "object",
       properties: {
         calendar_id: { type: "string", description: "Bo qua de dung lich mac dinh cua bot" },
@@ -135,7 +135,7 @@ export const toolDefinitions: Anthropic.Tool[] = [
     name: "create_report_doc",
     description:
       "Tao mot bao cao dang tai lieu Lark Docs (docx) tu tieu de va danh sach cac dong noi dung, tra ve duong dan de nguoi dung mo xem.",
-    input_schema: {
+    parametersJsonSchema: {
       type: "object",
       properties: {
         title: { type: "string" },
@@ -151,7 +151,7 @@ export const toolDefinitions: Anthropic.Tool[] = [
   {
     name: "send_email",
     description: "Gui mot email that su qua SMTP toi mot dia chi nguoi nhan.",
-    input_schema: {
+    parametersJsonSchema: {
       type: "object",
       properties: {
         to: { type: "string" },
@@ -165,7 +165,7 @@ export const toolDefinitions: Anthropic.Tool[] = [
   {
     name: "search_email",
     description: "Tim kiem email trong hop thu (IMAP) theo nguoi gui, tieu de hoac noi dung.",
-    input_schema: {
+    parametersJsonSchema: {
       type: "object",
       properties: {
         from: { type: "string" },
@@ -180,7 +180,7 @@ export const toolDefinitions: Anthropic.Tool[] = [
     name: "call_internal_api",
     description:
       "Goi mot API/he thong noi bo cua EIV (chi cac domain da duoc allowlist trong INTERNAL_API_ALLOWED_BASE_URLS) de thuc hien nghiep vu tuy chinh.",
-    input_schema: {
+    parametersJsonSchema: {
       type: "object",
       properties: {
         url: { type: "string" },

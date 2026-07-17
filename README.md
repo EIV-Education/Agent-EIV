@@ -1,15 +1,15 @@
 # Lark AI Agent (EIV Education)
 
-AI Agent chay tren Lark co kha nang **hanh dong that su** thay vi chi tra loi chat: tao/sua ban ghi trong Lark Base (Bitable), tao Task, dat lich Calendar, gui tin nhan chu dong, gui/tim email, tao bao cao (Lark Docs), va goi cac API noi bo cua EIV. Bo nao ra quyet dinh la Claude (Anthropic) qua co che tool-use: Claude tu chon tool nao can goi de hoan thanh yeu cau, thay vi chi sinh van ban.
+AI Agent chay tren Lark co kha nang **hanh dong that su** thay vi chi tra loi chat: tao/sua ban ghi trong Lark Base (Bitable), tao Task, dat lich Calendar, gui tin nhan chu dong, gui/tim email, tao bao cao (Lark Docs), va goi cac API noi bo cua EIV. Bo nao ra quyet dinh la Gemini (Google AI) qua co che function calling: Gemini tu chon tool nao can goi de hoan thanh yeu cau, thay vi chi sinh van ban.
 
 ## Kien truc
 
 ```
 Nguoi dung nhan tin cho bot tren Lark
         -> Lark gui event "im.message.receive_v1" ve /webhook/event
-        -> Claude (tool-use loop) doc noi dung, quyet dinh goi tool nao
+        -> Gemini (function-calling loop) doc noi dung, quyet dinh goi tool nao
         -> Tool goi Lark Open API / SMTP-IMAP / API noi bo de HANH DONG that
-        -> Claude tom tat ket qua -> bot tra loi lai nguoi dung tren Lark
+        -> Gemini tom tat ket qua -> bot tra loi lai nguoi dung tren Lark
 ```
 
 Cac tool hien co (`src/agent/tools.ts`):
@@ -53,7 +53,7 @@ Dien cac gia tri:
 
 - `LARK_APP_ID`, `LARK_APP_SECRET`, `LARK_ENCRYPT_KEY`, `LARK_VERIFICATION_TOKEN`: lay tu app vua tao o buoc 1.
 - `LARK_DOMAIN`: `lark` (quoc te, larksuite.com) hoac `feishu` (Trung Quoc, feishu.cn).
-- `ANTHROPIC_API_KEY`: API key Claude tai https://console.anthropic.com.
+- `GEMINI_API_KEY`: API key Gemini tai https://aistudio.google.com/apikey.
 - `EMAIL_*`: thong tin SMTP/IMAP neu can bat tinh nang gui/tim email (Gmail can dung "App Password", khong dung mat khau thuong).
 - `INTERNAL_API_ALLOWED_BASE_URLS`: danh sach domain API noi bo EIV duoc phep goi (bat buoc phai khai bao truoc thi tool `call_internal_api` moi hoat dong - day la bien phap chong SSRF).
 - `DEFAULT_BITABLE_APP_TOKEN` / `DEFAULT_BITABLE_TABLE_ID`: bang Lark Base mac dinh de agent thao tac khi nguoi dung khong chi ro.
@@ -93,4 +93,4 @@ Them tool moi bang cach:
 2. Khai bao tool (ten, mo ta, JSON schema input) trong `toolDefinitions` (`src/agent/tools.ts`).
 3. Them case xu ly trong `executeTool`.
 
-Claude se tu dong biet cach dung tool moi dua vao mo ta ban khai bao.
+Gemini se tu dong biet cach dung tool moi dua vao mo ta ban khai bao.

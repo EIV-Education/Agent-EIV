@@ -1,7 +1,7 @@
 {
   "name": "lark-ai-agent",
   "version": "1.0.0",
-  "description": "AI Agent tren Lark co kha nang hanh dong that su (Bitable, Task, Calendar, Message, Email, Docs, Webhook noi bo) thay vi chi tra loi chat, duoc dieu khien boi Claude tool-use.",
+  "description": "AI Agent tren Lark co kha nang hanh dong that su (Bitable, Task, Calendar, Message, Email, Docs, Webhook noi bo) thay vi chi tra loi chat, duoc dieu khien boi Gemini function calling.",
   "main": "dist/index.js",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
@@ -17,14 +17,14 @@
     "lark",
     "feishu",
     "ai-agent",
-    "claude",
+    "gemini",
     "bitable",
     "automation"
   ],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.111.0",
+    "@google/genai": "^2.12.0",
     "@larksuiteoapi/node-sdk": "^1.71.1",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",

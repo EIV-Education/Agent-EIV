@@ -24,9 +24,9 @@ export const config = {
     workspaceDomain: optional("LARK_WORKSPACE_DOMAIN"),
   },
 
-  anthropic: {
-    apiKey: optional("ANTHROPIC_API_KEY"),
-    model: optional("ANTHROPIC_MODEL", "claude-sonnet-5"),
+  gemini: {
+    apiKey: optional("GEMINI_API_KEY"),
+    model: optional("GEMINI_MODEL", "gemini-2.5-flash"),
   },
 
   email: {
@@ -57,5 +57,5 @@ export const config = {
 export function assertCoreConfig(): void {
   required("LARK_APP_ID");
   required("LARK_APP_SECRET");
-  required("ANTHROPIC_API_KEY");
+  required("GEMINI_API_KEY");
 }
