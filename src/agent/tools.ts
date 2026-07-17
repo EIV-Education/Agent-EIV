@@ -117,7 +117,8 @@ export const toolDefinitions: FunctionDeclaration[] = [
   },
   {
     name: "create_lark_calendar_event",
-    description: "Tao mot su kien / lich hop moi trong Lark Calendar.",
+    description:
+      "Tao mot su kien / lich hop moi trong Lark Calendar. Nguoi gui tin nhan hien tai se TU DONG duoc them lam nguoi tham gia (attendee) de lich xuat hien tren Lark ca nhan cua ho, khong can hoi lai.",
     parametersJsonSchema: {
       type: "object",
       properties: {
@@ -127,6 +128,11 @@ export const toolDefinitions: FunctionDeclaration[] = [
         start_timestamp: { type: "string", description: "Unix timestamp (giay) dang chuoi, thoi gian bat dau" },
         end_timestamp: { type: "string", description: "Unix timestamp (giay) dang chuoi, thoi gian ket thuc" },
         timezone: { type: "string", description: "Mac dinh Asia/Ho_Chi_Minh" },
+        attendee_open_ids: {
+          type: "array",
+          items: { type: "string" },
+          description: "open_id cua nhung nguoi KHAC (ngoai nguoi gui tin nhan) can moi tham gia, neu co",
+        },
       },
       required: ["summary", "start_timestamp", "end_timestamp"],
     },
@@ -192,7 +198,15 @@ export const toolDefinitions: FunctionDeclaration[] = [
   },
 ];
 
-export async function executeTool(name: string, input: Record<string, unknown>): Promise<string> {
+export interface ToolContext {
+  senderOpenId?: string;
+}
+
+export async function executeTool(
+  name: string,
+  input: Record<string, unknown>,
+  context: ToolContext = {}
+): Promise<string> {
   logger.info("Executing tool", name, JSON.stringify(input));
   try {
     switch (name) {
@@ -253,6 +267,10 @@ export async function executeTool(name: string, input: Record<string, unknown>):
       }
 
       case "create_lark_calendar_event": {
+        const otherAttendees = (input.attendee_open_ids as string[]) ?? [];
+        const attendeeOpenIds = context.senderOpenId
+          ? [context.senderOpenId, ...otherAttendees]
+          : otherAttendees;
         const event = await createCalendarEvent({
           calendarId: (input.calendar_id as string) || config.defaults.calendarId,
           summary: input.summary as string,
@@ -260,8 +278,9 @@ export async function executeTool(name: string, input: Record<string, unknown>):
           startTimestamp: input.start_timestamp as string,
           endTimestamp: input.end_timestamp as string,
           timezone: input.timezone as string | undefined,
+          attendeeOpenIds,
         });
-        return JSON.stringify({ ok: true, event });
+        return JSON.stringify({ ok: true, event, attendees_added: attendeeOpenIds });
       }
 
       case "create_report_doc": {

@@ -10,7 +10,11 @@ export function createServer() {
   app.use(express.json());
 
   registerMessageHandler(async (message) => {
-    const reply = await runAgent({ chatId: message.chatId, text: message.text });
+    const reply = await runAgent({
+      chatId: message.chatId,
+      text: message.text,
+      senderOpenId: message.senderOpenId,
+    });
     await replyText(message.messageId, reply);
   });
 
