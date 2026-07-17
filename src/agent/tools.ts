@@ -1,7 +1,7 @@
 import type { FunctionDeclaration } from "@google/genai";
 import { config } from "../config";
 import { sendText } from "../lark/messaging";
-import { createRecord, updateRecord, deleteRecord, searchRecords, createBase, SearchCondition, CreateBaseFieldInput } from "../lark/bitable";
+import { createRecord, updateRecord, deleteRecord, searchRecords, createBase, listTables, SearchCondition, CreateBaseFieldInput } from "../lark/bitable";
 import { createTask } from "../lark/task";
 import { createCalendarEvent } from "../lark/calendar";
 import { createReportDoc } from "../lark/docx";
@@ -107,6 +107,18 @@ export const toolDefinitions: FunctionDeclaration[] = [
         record_id: { type: "string" },
       },
       required: ["record_id"],
+    },
+  },
+  {
+    name: "list_bitable_tables",
+    description:
+      "Liet ke tat ca cac bang (table_id, ten bang) co trong mot Lark Base (Bitable) theo app_token. Dung khi da co app_token (vi du tu duong dan chia se hoac tu search_lark_docs) nhung chua biet table_id can thao tac.",
+    parametersJsonSchema: {
+      type: "object",
+      properties: {
+        app_token: { type: "string" },
+      },
+      required: ["app_token"],
     },
   },
   {
@@ -393,6 +405,11 @@ export async function executeTool(
         if (!appToken || !tableId) throw new Error("Thieu app_token/table_id va khong co gia tri mac dinh nao duoc cau hinh.");
         const result = await deleteRecord(appToken, tableId, input.record_id as string);
         return JSON.stringify({ ok: true, result });
+      }
+
+      case "list_bitable_tables": {
+        const tables = await listTables(input.app_token as string);
+        return JSON.stringify({ ok: true, tables });
       }
 
       case "bitable_search_records": {

@@ -26,6 +26,7 @@ Nguyen tac:
 - Khi nguoi dung nhac TEN RIENG cua mot ca nhan can moi (khong phai ten phong ban), PHAI goi search_lark_user voi ten do de lay open_id, KHONG duoc chi dua link moi thu cong hay noi "khong the tim thay" ma chua thu goi tool nay truoc. Chi bao khong tim duoc sau khi da goi search_lark_user va ket qua rong.
 - Khi can nam ngu canh cuoc tro chuyen (ai dang trong nhom, truoc do da noi gi) de tra loi cho dung, chu dong goi list_chat_members / list_recent_messages thay vi hoi lai nguoi dung.
 - Khi nguoi dung hoi thong tin co the da co san trong tai lieu/wiki noi bo cua cong ty (chinh sach, quy trinh, du lieu...), chu dong goi search_lark_docs truoc khi tra loi hoac noi khong biet.
+- Khi can thao tac mot Lark Base (Bitable) ma chi co app_token (vi du tu duong dan chia se hoac ket qua search_lark_docs) nhung chua biet table_id, PHAI goi list_bitable_tables voi app_token do de lay danh sach bang va chon table_id phu hop, KHONG duoc doan bua table_id hay bo cuoc ngay.
 - Tra loi ngan gon, di thang vao ket qua, dung dinh dang danh sach/markdown don gian khi can liet ke.`;
 
 const TIMEZONE = "Asia/Ho_Chi_Minh";
@@ -84,7 +85,7 @@ export async function runAgent(input: RunAgentInput): Promise<string> {
   const contents: Content[] = [...history.flat(), ...turnContents];
 
   let finalText = "";
-  const MAX_ITERATIONS = 8;
+  const MAX_ITERATIONS = 12;
   const systemInstruction = buildSystemPrompt(input.senderOpenId);
 
   for (let i = 0; i < MAX_ITERATIONS; i++) {

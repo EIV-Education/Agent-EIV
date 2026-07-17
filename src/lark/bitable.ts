@@ -4,6 +4,19 @@ import { grantFullAccess } from "./permissions";
 type FieldValue = string | number | boolean | Record<string, unknown> | unknown[];
 export type BitableFields = Record<string, FieldValue>;
 
+export interface BitableTable {
+  tableId?: string;
+  name?: string;
+}
+
+export async function listTables(appToken: string): Promise<BitableTable[]> {
+  const res = await larkClient.bitable.appTable.list({
+    path: { app_token: appToken },
+    params: { page_size: 100 },
+  });
+  return (res.data?.items ?? []).map((item) => ({ tableId: item.table_id, name: item.name }));
+}
+
 export async function createRecord(appToken: string, tableId: string, fields: BitableFields) {
   const res = await larkClient.bitable.appTableRecord.create({
     path: { app_token: appToken, table_id: tableId },
