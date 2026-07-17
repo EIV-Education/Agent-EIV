@@ -80,6 +80,19 @@ npm run build
 npm start
 ```
 
+## 4b. Deploy len Railway (khuyen nghi cho chay 24/7)
+
+Repo da co san `railway.json` (build bang Nixpacks, chay `npm start`).
+
+1. Vao https://railway.app -> dang nhap bang GitHub.
+2. **New Project -> Deploy from GitHub repo** -> chon repo `EIV-Education/Agent-EIV` -> chon branch dang dung (`claude/lark-ai-agent-actions-a51fbn` hoac `main` sau khi merge).
+3. Railway se tu build va deploy. Vao tab **Variables**, them toan bo bien trong `.env` (LARK_APP_ID, LARK_APP_SECRET, LARK_DOMAIN, LARK_ENCRYPT_KEY, LARK_VERIFICATION_TOKEN, GEMINI_API_KEY, GEMINI_MODEL, cac bien EMAIL_*, INTERNAL_API_*, DEFAULT_* neu dung) - **khong can tu dat `PORT`**, Railway tu dong cap.
+4. Vao tab **Settings -> Networking -> Generate Domain** de co URL public dang `https://<ten-app>.up.railway.app`.
+5. Quay lai Lark Developer Console -> **Event Subscriptions** -> dan `https://<ten-app>.up.railway.app/webhook/event` vao **Request URL** -> Lark se tu goi thu (`url_verification`) va bao thanh cong ngay neu deploy dung.
+6. Vao lai nhom chat Lark da moi bot, @ nhac bot de thu.
+
+Moi lan push code moi len branch da noi (hoac merge vao nhanh Railway theo doi), Railway se tu dong build & deploy lai.
+
 ## 5. Bao mat
 
 - `call_internal_api` chi goi duoc cac domain trong `INTERNAL_API_ALLOWED_BASE_URLS` - khong the goi URL bat ky (chong SSRF).
