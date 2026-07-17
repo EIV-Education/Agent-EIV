@@ -6,11 +6,12 @@ import { logger } from "./logger";
 // import here would crash with a raw SDK error instead of this clear one.
 assertCoreConfig();
 
-const { createServer } = require("./server") as typeof import("./server");
+const { createServer, startLarkConnection } = require("./server") as typeof import("./server");
 
 const app = createServer();
 
 app.listen(config.port, () => {
-  logger.info(`Lark AI Agent dang chay tren port ${config.port}`);
-  logger.info(`Webhook URL can khai bao trong Lark app: http://<domain-cong-khai>/webhook/event`);
+  logger.info(`Health check server dang chay tren port ${config.port} (khong can public de Lark hoat dong)`);
 });
+
+startLarkConnection();

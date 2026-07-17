@@ -6,11 +6,13 @@ AI Agent chay tren Lark co kha nang **hanh dong that su** thay vi chi tra loi ch
 
 ```
 Nguoi dung nhan tin cho bot tren Lark
-        -> Lark gui event "im.message.receive_v1" ve /webhook/event
+        -> Lark day event "im.message.receive_v1" qua ket noi WebSocket thuong truc (persistent connection)
         -> Gemini (function-calling loop) doc noi dung, quyet dinh goi tool nao
         -> Tool goi Lark Open API / SMTP-IMAP / API noi bo de HANH DONG that
         -> Gemini tom tat ket qua -> bot tra loi lai nguoi dung tren Lark
 ```
+
+App dung che do **Persistent Connection** (ket noi WebSocket thuong truc, SDK tu quan ly reconnect) de nhan su kien tu Lark thay vi webhook HTTP truyen thong - **khong can domain public, khong can cau hinh Request URL/Encrypt Key/Verification Token**. Server Express chi con dung cho endpoint `/health` (kiem tra tien trinh con song), khong bat buoc phai expose ra internet.
 
 Cac tool hien co (`src/agent/tools.ts`):
 
@@ -26,7 +28,7 @@ Cac tool hien co (`src/agent/tools.ts`):
 
 ## 1. Tao Lark App
 
-1. Vao https://open.larksuite.com/app (quoc te) hoac https://open.feishu.cn/app (Trung Quoc) -> **Create App** -> chon "Custom App".
+1. Vao https://open.larksuite.com/app (quoc te) hoac https://open.feishu.cn/app (Trung Quoc) -> **Create App** -> chon "Custom App" (self-build).
 2. Vao **Features -> Bot**, bat kha nang Bot cho app.
 3. Vao **Permissions & Scopes**, cap cac quyen sau (tuy tinh nang muon dung):
    - `im:message` va `im:message:send_as_bot` (gui/nhan tin nhan)
@@ -34,14 +36,14 @@ Cac tool hien co (`src/agent/tools.ts`):
    - `task:task:write` (tao Task)
    - `calendar:calendar` (tao su kien)
    - `docx:document` (tao tai lieu bao cao)
-4. Vao **Event Subscriptions**:
-   - Bat "Subscribe via API" (long polling) hoac nhap **Request URL**: `https://<domain-cong-khai-cua-ban>/webhook/event`
-   - Lark se goi thu URL nay de verify (`url_verification` challenge) - server da xu ly san.
-   - Subscribe event `im.message.receive_v1`.
-   - Copy **Encrypt Key** va **Verification Token** vao file `.env`.
+4. Vao **Events & Callbacks -> Event Configuration**:
+   - Bam icon but chi canh **Subscription mode** -> chon **"Receive events/callbacks through persistent connection"** (khuyen nghi, khong can domain public).
+   - Vao **Events**, subscribe (them) event `im.message.receive_v1`.
 5. Vao **Credentials**, copy `App ID` va `App Secret` vao `.env`.
 6. Publish app (hoac dung o che do Developer/Test cho workspace noi bo).
 7. Trong nhom chat Lark, moi bot vao nhom va **@ nhac** de bot phan hoi (o chat 1-1 thi bot phan hoi moi tin nhan).
+
+> Neu ban muon dung webhook HTTP (Request URL) truyen thong thay vi persistent connection, xem lich su git cua repo nay truoc thoi diem doi sang WSClient de tham khao cach lam cu (`Lark.adaptExpress`).
 
 ## 2. Cau hinh
 
@@ -51,8 +53,9 @@ cp .env.example .env
 
 Dien cac gia tri:
 
-- `LARK_APP_ID`, `LARK_APP_SECRET`, `LARK_ENCRYPT_KEY`, `LARK_VERIFICATION_TOKEN`: lay tu app vua tao o buoc 1.
+- `LARK_APP_ID`, `LARK_APP_SECRET`: lay tu app vua tao o buoc 1.
 - `LARK_DOMAIN`: `lark` (quoc te, larksuite.com) hoac `feishu` (Trung Quoc, feishu.cn).
+- `LARK_ENCRYPT_KEY`, `LARK_VERIFICATION_TOKEN`: **khong bat buoc** voi che do persistent connection, co the de trong.
 - `GEMINI_API_KEY`: API key Gemini tai https://aistudio.google.com/apikey.
 - `EMAIL_*`: thong tin SMTP/IMAP neu can bat tinh nang gui/tim email (Gmail can dung "App Password", khong dung mat khau thuong).
 - `INTERNAL_API_ALLOWED_BASE_URLS`: danh sach domain API noi bo EIV duoc phep goi (bat buoc phai khai bao truoc thi tool `call_internal_api` moi hoat dong - day la bien phap chong SSRF).
@@ -65,13 +68,7 @@ npm install
 npm run dev
 ```
 
-Server lang nghe tai `http://localhost:3000`. Dung [ngrok](https://ngrok.com) hoac tuong tu de expose ra internet cho Lark goi webhook:
-
-```bash
-ngrok http 3000
-```
-
-Roi cap nhat lai **Request URL** trong Event Subscriptions thanh `https://<ngrok-id>.ngrok.io/webhook/event`.
+Khong can ngrok hay domain public gi ca - app tu ket noi ra Lark qua WebSocket. Log se bao `Da ket noi Lark qua persistent connection (WebSocket)` khi thanh cong.
 
 ## 4. Build & chay production
 
@@ -85,18 +82,18 @@ npm start
 Repo da co san `railway.json` (build bang Nixpacks, chay `npm start`).
 
 1. Vao https://railway.app -> dang nhap bang GitHub.
-2. **New Project -> Deploy from GitHub repo** -> chon repo `EIV-Education/Agent-EIV` -> chon branch dang dung (`claude/lark-ai-agent-actions-a51fbn` hoac `main` sau khi merge).
-3. Railway se tu build va deploy. Vao tab **Variables**, them toan bo bien trong `.env` (LARK_APP_ID, LARK_APP_SECRET, LARK_DOMAIN, LARK_ENCRYPT_KEY, LARK_VERIFICATION_TOKEN, GEMINI_API_KEY, GEMINI_MODEL, cac bien EMAIL_*, INTERNAL_API_*, DEFAULT_* neu dung) - **khong can tu dat `PORT`**, Railway tu dong cap.
-4. Vao tab **Settings -> Networking -> Generate Domain** de co URL public dang `https://<ten-app>.up.railway.app`.
-5. Quay lai Lark Developer Console -> **Event Subscriptions** -> dan `https://<ten-app>.up.railway.app/webhook/event` vao **Request URL** -> Lark se tu goi thu (`url_verification`) va bao thanh cong ngay neu deploy dung.
+2. **New Project -> Deploy from GitHub repo** -> chon repo `EIV-Education/Agent-EIV` -> chon branch dang dung.
+3. Vao tab **Variables**, them toan bo bien trong `.env` (LARK_APP_ID, LARK_APP_SECRET, LARK_DOMAIN, GEMINI_API_KEY, GEMINI_MODEL, cac bien EMAIL_*, INTERNAL_API_*, DEFAULT_* neu dung) - **khong can tu dat `PORT`**, Railway tu dong cap. Sau khi them xong nho bam nut **Deploy** (banner o dau trang Variables) de ap dung - "Redeploy" tren mot deployment cu se KHONG lay bien moi.
+4. **Khong can generate domain** - day la diem khac biet so voi webhook truyen thong, service co the la "Unexposed" van hoat dong binh thuong vi ket noi la chieu tu server ra Lark (outbound), khong phai Lark goi vao.
+5. Vao xem **Deploy Logs**, xac nhan thay dong `Da ket noi Lark qua persistent connection (WebSocket)` khong loi.
 6. Vao lai nhom chat Lark da moi bot, @ nhac bot de thu.
 
-Moi lan push code moi len branch da noi (hoac merge vao nhanh Railway theo doi), Railway se tu dong build & deploy lai.
+Moi lan push code moi len branch da noi, Railway se tu dong build & deploy lai.
 
 ## 5. Bao mat
 
 - `call_internal_api` chi goi duoc cac domain trong `INTERNAL_API_ALLOWED_BASE_URLS` - khong the goi URL bat ky (chong SSRF).
-- Signature/ma hoa webhook cua Lark (Encrypt Key + Verification Token) duoc SDK chinh thuc `@larksuiteoapi/node-sdk` xu ly, khong tu decode thu cong.
+- Ket noi persistent connection va cac API call deu di qua HTTPS/WSS xac thuc bang App ID/Secret, xu ly boi SDK chinh thuc `@larksuiteoapi/node-sdk`.
 - Khong commit file `.env` (da co trong `.gitignore`).
 
 ## 6. Mo rong them
